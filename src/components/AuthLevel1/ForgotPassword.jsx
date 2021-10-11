@@ -1,17 +1,23 @@
-import React, {useState, useEffect} from 'react';
-import {useHistory} from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import axios from "axios";
-import Avatar from '@material-ui/core/Avatar';
-import {Button, CircularProgress} from '@material-ui/core';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
+import ReCAPTCHA from "react-google-recaptcha";
+
+import {
+  Button,
+  CssBaseline,
+  Link,
+  Grid,
+  Box,
+  Container,
+  Typography
+} from '@material-ui/core';
+
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import Textfield from '../FormsUI/Textfield';
 
 import Alert from '@material-ui/lab/Alert';
 
@@ -30,32 +36,23 @@ function Copyright() {
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(10),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
+  formWrapper: {
+    marginTop: theme.spacing(4),
   },
 }));
 
-export default function SignIn() {
+const ForgotPassword = React.memo(() => {
   const classes = useStyles();
   const history = useHistory();
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [emailError, setEmailError] = useState('');
+  const [error, setError] = useState();
   const [loading, setLoading] = useState();
+  const [message, setMessage] = useState();
+  const recaptchaRef = useRef(null)
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {
@@ -63,117 +60,115 @@ export default function SignIn() {
     }
   }, [history]);
 
-    const ValidateEmail = (mail) => {
-      if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(mail))
-        {
-          return true
-        }
-        return false
-    }
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-  
-      if(!email) {
-        return setEmailError("Please provide an email");
-      }
-  
-      if(!ValidateEmail(email)) {
-        return setEmailError("Email badly formatted");
-      }
-  
-      setEmailError('');
+  const INITIAL_FORM_STATE = {
+    email: '',
+    termsOfService: false
+  };
+    
+  const FORM_VALIDATION = Yup.object().shape({
+    email: Yup.string()
+      .email('Invalid email.')
+      .required('Required')
+    });
 
-      setLoading(true);
-      const config = {
-        header: {
-          "Content-Type": "application/json",
-        },
-      };
+  const handleSubmit = async (values) => {
+    setLoading(true);
+    const { email } = values;
+    const config = {
+      header: {
+        "Content-Type": "application/json",
+      },
+    };
   
-      try {
-        const { data } = await axios.post(
-          "/api/auth/forgotpassword",
-          { email },
-          config
-        );
-        setLoading(false);
-        setSuccess(data.data);
-      } catch (error) {
-        setError(error.response.data.error);
-        setEmail("");
-        setLoading(false);
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
-      
-      return true;
+    try {
+      const res = await axios.post(
+        "http://localhost:9997/api/auth/forgotPassword",
+        { email },
+        config
+      );
+      setLoading(false);
+      setMessage(res.data.data)
+    } catch (error) {
+      setError(error.response.data.error);
+      setLoading(false);
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     }
+  }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
+        <Typography component="h1" variant="h5" gutterBottom>
           Forgot Password
+        </Typography>
+        <Typography variant="body2" color='textSecondary' gutterBottom>
+          secure e-voting platform
         </Typography>
         {
           error &&
           <Alert severity="error">{error}</Alert>
         }
         {
-          success &&
-          <Alert severity="success">{success}</Alert>
+          message &&
+          <Alert varinat='outlined' severity="info">{message}</Alert>
         }
-        <form className={classes.form} onSubmit={handleSubmit} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            onChange={(e) => setEmail(e.target.value)}
-            error = {!!emailError}
-            helperText = {emailError}
-          />
+        <Grid container>
+          <Grid item xs={12}>
+            <div className={classes.formWrapper}>
+              <Formik
+                initialValues={{
+                  ...INITIAL_FORM_STATE
+                }}
+                validationSchema={FORM_VALIDATION}
+                onSubmit={values => handleSubmit(values)}
+              >
+                <Form>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Textfield
+                      name="email"
+                      label="Email"
+                    />
+                  </Grid>
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
+                    size="invisible"
+                  />
 
-          {loading ? 
-            <Grid container align="center">
-              <Grid item xs>
-                <CircularProgress/>
-              </Grid>
-            </Grid>
-          :
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Submit
-            </Button>
-          }
-          <Grid container>
-            <Grid item xs>
-              <Link href="/authLevel1" variant="body2">
-                Back to Login
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
+                <Grid item>
+                  <Link href="/authLevel1" variant="body2">
+                    {"Go back to login?"}
+                  </Link>
+                </Grid>
+
+                  <Grid item xs={12} align='right'>
+                    <Button 
+                      type='submit'
+                      disabled={loading}
+                      color='primary'
+                      variant='contained'
+                      style={{marginBottom: '1em'}}
+                    >
+                      Submit 
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Form>
+            </Formik>
+          </div>
+
+      </Grid>
+      </Grid>
       </div>
-      <Box mt={8}>
+      <Box mt={5}>
         <Copyright />
       </Box>
     </Container>
   );
-}
+})
+
+export default ForgotPassword;

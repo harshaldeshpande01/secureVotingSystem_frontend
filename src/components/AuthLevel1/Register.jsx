@@ -11,7 +11,6 @@ import {
   Box,
   Container,
   Typography,
-  CircularProgress,
   InputAdornment,
   IconButton
 } from '@material-ui/core';
@@ -49,17 +48,14 @@ const useStyles = makeStyles((theme) => ({
   formWrapper: {
     marginTop: theme.spacing(4),
   },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
 }));
 
-const ResetPassword = React.memo(({match}) => {
+const Register = React.memo(() => {
   const classes = useStyles();
   const history = useHistory();
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState();
   const [loading, setLoading] = useState();
+  const [message, setMessage] = useState();
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
@@ -72,53 +68,59 @@ const ResetPassword = React.memo(({match}) => {
   }, [history]);
 
   const INITIAL_FORM_STATE = {
-    password: ''
+    email: '',
+    phone: '',
+    password: '',
+    // recaptcha: '',
+    termsOfService: false
   };
     
   const FORM_VALIDATION = Yup.object().shape({
+    email: Yup.string()
+      .email('Invalid email.')
+      .required('Required'),
+    phone: Yup.number()
+      .integer()
+      .typeError('Please enter a valid phone number')
+      .required('Required'),
     password: Yup.string()
       .required('Password is required')
       .min(6)
-  });
+    // recaptcha: Yup.string().required(),
+    });
 
-    const handleSubmit = async (values) => {
-      const {password} = values;
-
-      setLoading(true);
-      
-      const config = {
-        header: {
-          "Content-Type": "application/json",
-        },
-      };
+  const registerUser = async (values) => {
+    setLoading(true);
+    const {email, phone, password} = values;
+    const config = {
+      header: {
+        "Content-Type": "application/json",
+      },
+    };
   
-      try {
-        const { data } = await axios.put(
-          `http://localhost:9997/api/auth/passwordreset/${match.params.resetToken}`,
-          {
-            password,
-          },
-          config
-        );
-        setLoading(false);
-        setSuccess(data.data);
-      } catch (error) {
-        setError(error.response.data.error);
-        setLoading(false);
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
-      
-      return true;
+    try {
+      const res = await axios.post(
+        "http://localhost:9997/api/auth/register",
+        { email, password, phone },
+        config
+      );
+      setLoading(false);
+      setMessage(res.data.data)
+    } catch (error) {
+      setError(error.response.data.error);
+      setLoading(false);
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     }
+  }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5" gutterBottom>
-          Reset Password
+          Register
         </Typography>
         <Typography variant="body2" color='textSecondary' gutterBottom>
           secure e-voting platform
@@ -128,8 +130,8 @@ const ResetPassword = React.memo(({match}) => {
           <Alert severity="error">{error}</Alert>
         }
         {
-          success &&
-          <Alert severity="success">{success}</Alert>
+          message &&
+          <Alert varinat='outlined' severity="info">{message}</Alert>
         }
         <Grid container>
           <Grid item xs={12}>
@@ -139,12 +141,34 @@ const ResetPassword = React.memo(({match}) => {
                   ...INITIAL_FORM_STATE
                 }}
                 validationSchema={FORM_VALIDATION}
-                onSubmit={values => handleSubmit(values)}
+                onSubmit={values => registerUser(values)}
               >
+                {/* {(props) => {
+                  const handleBlur = (e) => {
+                    console.log("$$$$", props.isSubmitting);
+                    if (!props.values.recaptcha) {
+                      reCaptchaRef.current.execute();
+                      props.setSubmitting(true);
+                    }
+                    props.handleBlur(e);
+                  }; */}
                 <Form>
                 <Grid container spacing={2}>
-                  
-                <Grid item xs={12}>
+                  <Grid item xs={12}>
+                    <Textfield
+                      name="email"
+                      label="Email"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
+                    <Textfield
+                      name="phone"
+                      label="Phone"
+                    />
+                  </Grid>
+
+                  <Grid item xs={12}>
                     <Textfield
                       name="password"
                       label="Password"
@@ -168,42 +192,47 @@ const ResetPassword = React.memo(({match}) => {
                   <ReCAPTCHA
                     ref={recaptchaRef}
                     sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
+                    // onChange={(value) => {
+                    //   console.log("$$$$", props.isSubmitting, value);
+                    //   props.setFieldValue("recaptcha", value);
+                    //   props.setSubmitting(false);
+                    // }}
                     size="invisible"
                   />
-
-                <Grid item>
+                <Grid item md={12} xs={12}>
+                  <Typography variant="body2" color='textSecondary'>
+                    Already have an account?
+                  </Typography>
                   <Link href="/authLevel1" variant="body2">
-                    {"Go back to login?"}
+                    {"Login here"}
                   </Link>
                 </Grid>
 
                   <Grid item xs={12} align='right'>
-                    {
-                      loading?
-                      <CircularProgress/>
-                      :
-                      <Button 
-                        type='submit'
-                        color='primary'
-                        variant='contained'
-                      >
-                        Submit 
-                      </Button>
-                    }
+                    <Button 
+                      type='submit'
+                      disabled={loading}
+                      color='primary'
+                      variant='contained'
+                      style={{marginBottom: '1em'}}
+                    >
+                      Submit
+                    </Button>
                   </Grid>
                 </Grid>
               </Form>
+            {/* }} */}
             </Formik>
           </div>
 
       </Grid>
       </Grid>
       </div>
-      <Box mt={8}>
+      <Box mt={5}>
         <Copyright />
       </Box>
     </Container>
   );
 })
 
-export default ResetPassword;
+export default Register;

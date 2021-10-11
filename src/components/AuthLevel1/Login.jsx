@@ -1,18 +1,28 @@
-import React, {useState, useEffect} from 'react';
-import {useHistory} from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import axios from "axios";
-import Avatar from '@material-ui/core/Avatar';
-import {Button, CircularProgress} from '@material-ui/core';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
+import ReCAPTCHA from "react-google-recaptcha";
+
+import {
+  Button,
+  CssBaseline,
+  Link,
+  Grid,
+  Box,
+  Container,
+  Typography,
+  CircularProgress,
+  InputAdornment,
+  IconButton
+} from '@material-ui/core';
+
 import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import ReCAPTCHA from 'react-google-recaptcha';
+import Visibility from "@material-ui/icons/Visibility";
+import VisibilityOff from "@material-ui/icons/VisibilityOff";
+
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import Textfield from '../FormsUI/Textfield';
 
 import Alert from '@material-ui/lab/Alert';
 
@@ -31,221 +41,188 @@ function Copyright() {
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(10),
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'center'
   },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
+  formWrapper: {
+    marginTop: theme.spacing(4),
   },
 }));
 
-export default function SignIn() {
+const Login = React.memo(() => {
   const classes = useStyles();
   const history = useHistory();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [error, setError] = useState();
   const [loading, setLoading] = useState();
-  const recaptchaRef = React.useRef();
+  const [message, setMessage] = useState();
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
+  const recaptchaRef = useRef(null)
 
   useEffect(() => {
-    // async function trial() {
-    //   await recaptchaRef.current.executeAsync();
-    // }
     if (localStorage.getItem("authToken")) {
       history.push("/authLevel2");
     }
-    // trial();
   }, [history]);
 
-    const ValidateEmail = (mail) => {
-      if (/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(mail))
-        {
-          return true
-        }
-        return false
+  const INITIAL_FORM_STATE = {
+    email: '',
+    password: '',
+    // recaptcha: '',
+    termsOfService: false
+  };
+    
+  const FORM_VALIDATION = Yup.object().shape({
+    email: Yup.string()
+      .email('Invalid email.')
+      .required('Please provide email address'),
+    password: Yup.string()
+      .required('Password is required')
+      .min(6)
+    // recaptcha: Yup.string().required(),
+    });
+
+  const loginUser = async (values) => {
+    setLoading(true);
+    const {email, password} = values;
+    const config = {
+      header: {
+        "Content-Type": "application/json",
+      },
+    };
+  
+    try {
+      const res = await axios.post(
+        "http://localhost:9997/api/auth/login",
+        { email, password },
+        config
+      );
+      setLoading(false);
+      setMessage(res.data.data)
+      localStorage.setItem("authToken", res.data.token);
+      history.push('/authLevel2');
+    } catch (error) {
+      setError(error.response.data.error);
+      setLoading(false);
+      setTimeout(() => {
+        setError("");
+      }, 5000);
     }
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      // console.log('here');
-  
-      if(!email) {
-        return setEmailError("Please provide an email");
-      }
-  
-      if(!ValidateEmail(email)) {
-        return setEmailError("Email badly formatted");
-      }
-  
-      setEmailError('');
-  
-      if(!password) {
-        return setPasswordError("Please provide your password");
-      }
-  
-      if(password.length < 6) {
-        return setPasswordError("Minimum 6 characters required");
-      }
-  
-      setPasswordError('');
-
-      const token = await recaptchaRef.current.executeAsync();
-
-      setLoading(true);
-      const config = {
-        header: {
-          "Content-Type": "application/json",
-        },
-      };
-  
-      try {
-        const { data } = await axios.post(
-          "/api/auth/login",
-          { email, password },
-          config
-        );
-  
-        localStorage.setItem("authToken", data.token);
-        setLoading(false);
-        history.push("/authLevel2");
-      } catch (error) {
-        setError(error.response.data.error);
-        setLoading(false);
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
-      
-      return true;
-    }
-
-  // const loginHandler = async (e) => {
-  //   e.preventDefault();
-
-  //   const config = {
-  //     header: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   };
-
-  //   try {
-  //     const { data } = await axios.post(
-  //       "/api/auth/login",
-  //       { email, password },
-  //       config
-  //     );
-
-  //     localStorage.setItem("authToken", data.token);
-
-  //     history.push("/authLevel2");
-  //   } catch (error) {
-  //     setError(error.response.data.error);
-  //     setTimeout(() => {
-  //       setError("");
-  //     }, 5000);
-  //   }
-  // };
+  }
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
+        <Typography component="h1" variant="h5" gutterBottom>
+          Sign In
+        </Typography>
+        <Typography variant="body2" color='textSecondary' gutterBottom>
+          secure e-voting platform
         </Typography>
         {
           error &&
           <Alert severity="error">{error}</Alert>
         }
-        <form className={classes.form} onSubmit={handleSubmit} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            onChange={(e) => setEmail(e.target.value)}
-            error = {!!emailError}
-            helperText = {emailError}
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            onChange={(e) => setPassword(e.target.value)}
-            error = {!!passwordError}
-            helperText = {passwordError}
-          />
-          {/* <Grid container align="center">
-              <Grid item md={6}> */}
-              <ReCAPTCHA 
-              size='invisible'
-              sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
-              ref={recaptchaRef}
-            />
-              {/* </Grid>
-            </Grid> */}
+        {
+          message &&
+          <Alert varinat='outlined' severity="info">{message}</Alert>
+        }
+        <Grid container>
+          <Grid item xs={12}>
+            <div className={classes.formWrapper}>
+              <Formik
+                initialValues={{
+                  ...INITIAL_FORM_STATE
+                }}
+                validationSchema={FORM_VALIDATION}
+                onSubmit={values => loginUser(values)}
+              >
+                <Form>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Textfield
+                      name="email"
+                      label="Email"
+                    />
+                  </Grid>
 
-          {loading ? 
-            <Grid container align="center">
-              <Grid item xs>
-                <CircularProgress/>
-              </Grid>
-            </Grid>
-          :
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Sign In
-            </Button>
-          }
-          <Grid container>
-            <Grid item xs>
-              <Link href="/authLevel1/forgotPassword" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="/authLevel1/register" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
+                  <Grid item xs={12}>
+                    <Textfield
+                      name="password"
+                      label="Password"
+                      type={showPassword ? "text" : "password"}
+                      InputProps={{ // <-- This is where the toggle button is added.
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={handleClickShowPassword}
+                              onMouseDown={handleMouseDownPassword}
+                            >
+                              {showPassword ? <Visibility color='primary'/> : <VisibilityOff color='primary'/>}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  </Grid>
+
+                  <ReCAPTCHA
+                    ref={recaptchaRef}
+                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
+                    size="invisible"
+                  />
+
+                <Grid item md={12} xs={12}>
+                  <Link href="/authLevel1/forgotPassword" variant="body2">
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item md={12} xs={12}>
+                  <Typography variant="body2" color='textSecondary'>
+                    You can join us now by
+                  </Typography>
+                  <Link href="/authLevel1/register" variant="body2">
+                    {"Creating a account"}
+                  </Link>
+                </Grid>
+
+                  <Grid item xs={12} align='right'>
+                    {
+                      loading?
+                      <CircularProgress/>
+                      :
+                      <Button 
+                        type='submit'
+                        disabled={loading}
+                        color='primary'
+                        variant='contained'
+                        style={{marginBottom: '1em'}}
+                        // fullWidth
+                      >
+                        Login
+                      </Button>
+                    }
+                  </Grid>
+                </Grid>
+              </Form>
+            {/* }} */}
+            </Formik>
+          </div>
+
+      </Grid>
+      </Grid>
       </div>
-      <Box mt={8}>
+      <Box mt={5}>
         <Copyright />
       </Box>
     </Container>
   );
-}
+})
+
+export default Login;
+
