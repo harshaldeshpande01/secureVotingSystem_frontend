@@ -107,7 +107,7 @@ const ResetPassword = React.memo(({match}) => {
         setLoading(false);
         setSuccess(data.data);
       } catch (error) {
-        setError(error.response.data.error);
+        setError(error.response.data);
         setLoading(false);
         setTimeout(() => {
           setError("");

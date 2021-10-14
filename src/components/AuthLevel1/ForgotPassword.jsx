@@ -95,7 +95,7 @@ const ForgotPassword = React.memo(() => {
       setLoading(false);
       setMessage(res.data.data)
     } catch (error) {
-      setError(error.response.data.error);
+      setError(error.response.data);
       setLoading(false);
       setTimeout(() => {
         setError("");

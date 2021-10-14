@@ -71,7 +71,6 @@ const Register = React.memo(() => {
     email: '',
     phone: '',
     password: '',
-    // recaptcha: '',
     termsOfService: false
   };
     
@@ -86,12 +85,16 @@ const Register = React.memo(() => {
     password: Yup.string()
       .required('Password is required')
       .min(6)
-    // recaptcha: Yup.string().required(),
     });
 
   const registerUser = async (values) => {
     setLoading(true);
     const {email, phone, password} = values;
+    let temp=phone;
+    if(temp[0] === '+') {
+      temp = temp.substring(1);
+    }
+
     const config = {
       header: {
         "Content-Type": "application/json",
@@ -107,7 +110,7 @@ const Register = React.memo(() => {
         { 
           email, 
           password, 
-          phone,
+          phone: temp,
           captchaToken 
         },
         config
@@ -115,7 +118,7 @@ const Register = React.memo(() => {
       setLoading(false);
       setMessage(res.data.data)
     } catch (error) {
-      setError(error.response.data.error);
+      setError(error.response.data);
       setLoading(false);
       setTimeout(() => {
         setError("");

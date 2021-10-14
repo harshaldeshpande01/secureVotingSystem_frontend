@@ -90,25 +90,19 @@ const AuthLevel2 = React.memo(() => {
         localStorage.setItem("hashOTP", res.data.hash);
         setError('');
       } catch (error) {
-        console.log(error);
         if(error.response.status === 401) {
           alert("Your session has expired. Please login again to continue"); 
           localStorage.removeItem("authToken");
           window.location.href = "http://localhost:3000/authLevel1";
         }
         else {
-          setError(error.response.data.error);
+          setError(error.response.data);
           setLoading(false);
         }
       }  
     }
     sendOTP();
   }, [])
-
-  // useEffect(() => {
-  //   let hashOTP = localStorage.getItem("hashOTP");
-  //   setHash(hashOTP);
-  // }, []);
 
   const INITIAL_FORM_STATE = {
     otp: ''
@@ -154,7 +148,6 @@ const AuthLevel2 = React.memo(() => {
         localStorage.removeItem("hashOTP");
         history.push("/authLevel3");
       } catch (error) {
-        console.log(error);
         if(error.response.status === 401) {
           alert("Your session has expired. Please login again to continue"); 
           localStorage.clear();
@@ -166,7 +159,7 @@ const AuthLevel2 = React.memo(() => {
           window.location.href = "http://localhost:3000/authLevel1";
         }
         else {
-        setError(error.response.data.error);
+        setError(error.response.data);
         setLoading(false);
         }
       }    

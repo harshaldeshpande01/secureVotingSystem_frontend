@@ -94,7 +94,7 @@ const Login = React.memo(() => {
 
     const captchaToken = await recaptchaRef.current.executeAsync();
     recaptchaRef.current.reset();
-  
+    
     try {
       const res = await axios.post(
         "http://localhost:9997/api/auth/login",
@@ -160,7 +160,7 @@ const Login = React.memo(() => {
                       name="password"
                       label="Password"
                       type={showPassword ? "text" : "password"}
-                      InputProps={{ // <-- This is where the toggle button is added.
+                      InputProps={{ 
                         endAdornment: (
                           <InputAdornment position="end">
                             <IconButton
@@ -201,7 +201,6 @@ const Login = React.memo(() => {
                         color='primary'
                         variant='contained'
                         style={{marginBottom: '1em'}}
-                        // fullWidth
                       >
                         Login
                       </Button>
