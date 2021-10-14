@@ -91,12 +91,16 @@ const ResetPassword = React.memo(({match}) => {
           "Content-Type": "application/json",
         },
       };
+
+    const captchaToken = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
   
       try {
         const { data } = await axios.put(
           `http://localhost:9997/api/auth/passwordreset/${match.params.resetToken}`,
           {
             password,
+            captchaToken
           },
           config
         );
@@ -165,12 +169,6 @@ const ResetPassword = React.memo(({match}) => {
                     />
                   </Grid>
 
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
-                    size="invisible"
-                  />
-
                 <Grid item>
                   <Link href="/authLevel1" variant="body2">
                     {"Go back to login?"}
@@ -194,6 +192,11 @@ const ResetPassword = React.memo(({match}) => {
                 </Grid>
               </Form>
             </Formik>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              size="invisible"
+            />
           </div>
 
       </Grid>

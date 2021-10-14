@@ -79,11 +79,17 @@ const ForgotPassword = React.memo(() => {
         "Content-Type": "application/json",
       },
     };
+
+    const captchaToken = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
   
     try {
       const res = await axios.post(
         "http://localhost:9997/api/auth/forgotPassword",
-        { email },
+        { 
+          email,
+          captchaToken
+        },
         config
       );
       setLoading(false);
@@ -133,11 +139,6 @@ const ForgotPassword = React.memo(() => {
                       label="Email"
                     />
                   </Grid>
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
-                    size="invisible"
-                  />
 
                 <Grid item>
                   <Link href="/authLevel1" variant="body2">
@@ -159,6 +160,11 @@ const ForgotPassword = React.memo(() => {
                 </Grid>
               </Form>
             </Formik>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              size="invisible"
+            />
           </div>
 
       </Grid>

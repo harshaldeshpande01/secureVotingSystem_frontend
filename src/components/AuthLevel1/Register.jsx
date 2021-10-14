@@ -97,11 +97,19 @@ const Register = React.memo(() => {
         "Content-Type": "application/json",
       },
     };
+
+    const captchaToken = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
   
     try {
       const res = await axios.post(
         "http://localhost:9997/api/auth/register",
-        { email, password, phone },
+        { 
+          email, 
+          password, 
+          phone,
+          captchaToken 
+        },
         config
       );
       setLoading(false);
@@ -143,15 +151,6 @@ const Register = React.memo(() => {
                 validationSchema={FORM_VALIDATION}
                 onSubmit={values => registerUser(values)}
               >
-                {/* {(props) => {
-                  const handleBlur = (e) => {
-                    console.log("$$$$", props.isSubmitting);
-                    if (!props.values.recaptcha) {
-                      reCaptchaRef.current.execute();
-                      props.setSubmitting(true);
-                    }
-                    props.handleBlur(e);
-                  }; */}
                 <Form>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
@@ -188,17 +187,6 @@ const Register = React.memo(() => {
                       }}
                     />
                   </Grid>
-
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
-                    // onChange={(value) => {
-                    //   console.log("$$$$", props.isSubmitting, value);
-                    //   props.setFieldValue("recaptcha", value);
-                    //   props.setSubmitting(false);
-                    // }}
-                    size="invisible"
-                  />
                 <Grid item md={12} xs={12}>
                   <Typography variant="body2" color='textSecondary'>
                     Already have an account?
@@ -221,8 +209,12 @@ const Register = React.memo(() => {
                   </Grid>
                 </Grid>
               </Form>
-            {/* }} */}
             </Formik>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              size="invisible"
+            />
           </div>
 
       </Grid>

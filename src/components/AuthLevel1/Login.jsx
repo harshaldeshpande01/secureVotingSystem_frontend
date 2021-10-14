@@ -60,7 +60,7 @@ const Login = React.memo(() => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
-  const recaptchaRef = useRef(null)
+  const recaptchaRef = useRef();
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {
@@ -71,7 +71,6 @@ const Login = React.memo(() => {
   const INITIAL_FORM_STATE = {
     email: '',
     password: '',
-    // recaptcha: '',
     termsOfService: false
   };
     
@@ -82,7 +81,6 @@ const Login = React.memo(() => {
     password: Yup.string()
       .required('Password is required')
       .min(6)
-    // recaptcha: Yup.string().required(),
     });
 
   const loginUser = async (values) => {
@@ -93,11 +91,18 @@ const Login = React.memo(() => {
         "Content-Type": "application/json",
       },
     };
+
+    const captchaToken = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
   
     try {
       const res = await axios.post(
         "http://localhost:9997/api/auth/login",
-        { email, password },
+        { 
+          email, 
+          password, 
+          captchaToken 
+        },
         config
       );
       setLoading(false);
@@ -105,7 +110,7 @@ const Login = React.memo(() => {
       localStorage.setItem("authToken", res.data.token);
       history.push('/authLevel2');
     } catch (error) {
-      setError(error.response.data.error);
+      setError(error.response.data);
       setLoading(false);
       setTimeout(() => {
         setError("");
@@ -171,12 +176,6 @@ const Login = React.memo(() => {
                     />
                   </Grid>
 
-                  <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey="6Lc_3EMcAAAAAK88Hn5XvO_60q6MfW29yT1BMdad"
-                    size="invisible"
-                  />
-
                 <Grid item md={12} xs={12}>
                   <Link href="/authLevel1/forgotPassword" variant="body2">
                     Forgot password?
@@ -210,8 +209,12 @@ const Login = React.memo(() => {
                   </Grid>
                 </Grid>
               </Form>
-            {/* }} */}
             </Formik>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              size="invisible"
+            />
           </div>
 
       </Grid>
