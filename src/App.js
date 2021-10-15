@@ -15,6 +15,7 @@ const ForgotPassword = React.lazy(() => import('./components/AuthLevel1/ForgotPa
 const ResetPassword = React.lazy(() => import('./components/AuthLevel1/ResetPassword'));
 const AuthLevel2 = React.lazy(() => import('./components/AuthLevel2/AuthLevel2'));
 const AuthLevel3 = React.lazy(() => import('./components/AuthLevel3/AuthLevel3'));
+const PageNotFound = React.lazy(() => import('./components/404/404'));
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route exact path="/authLevel1/register" component={Register} />
           <Route exact path="/authLevel1/forgotpassword" component={ForgotPassword}/>
           <Route exact path="/authLevel1/passwordreset/:resetToken" component={ResetPassword}/>
+          <Route component={PageNotFound} />
         </Switch>
 
       </Suspense>
