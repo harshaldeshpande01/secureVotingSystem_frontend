@@ -77,14 +77,17 @@ const Register = React.memo(() => {
   const FORM_VALIDATION = Yup.object().shape({
     email: Yup.string()
       .email('Invalid email.')
-      .required('Required'),
+      .required('Required')
+      .max(64),
     phone: Yup.number()
       .integer()
       .typeError('Please enter a valid phone number')
-      .required('Required'),
+      .required('Required')
+      .min(10),
     password: Yup.string()
       .required('Password is required')
       .min(6)
+      .max(64),
     });
 
   const registerUser = async (values) => {
@@ -93,6 +96,9 @@ const Register = React.memo(() => {
     let temp=phone;
     if(temp[0] === '+') {
       temp = temp.substring(1);
+    }
+    if(temp.length === 10){
+      temp = "91" + temp;
     }
 
     const config = {

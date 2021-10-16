@@ -77,10 +77,12 @@ const Login = React.memo(() => {
   const FORM_VALIDATION = Yup.object().shape({
     email: Yup.string()
       .email('Invalid email.')
-      .required('Please provide email address'),
+      .required('Please provide email address')
+      .max(64),
     password: Yup.string()
       .required('Password is required')
       .min(6)
+      .max(64)
     });
 
   const loginUser = async (values) => {

@@ -69,6 +69,7 @@ const ForgotPassword = React.memo(() => {
     email: Yup.string()
       .email('Invalid email.')
       .required('Required')
+      .max(64)
     });
 
   const handleSubmit = async (values) => {

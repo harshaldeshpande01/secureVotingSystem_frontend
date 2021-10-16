@@ -79,6 +79,7 @@ const ResetPassword = React.memo(({match}) => {
     password: Yup.string()
       .required('Password is required')
       .min(6)
+      .max(64)
   });
 
     const handleSubmit = async (values) => {
