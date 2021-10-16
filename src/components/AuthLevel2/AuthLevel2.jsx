@@ -61,48 +61,53 @@ const AuthLevel2 = React.memo(() => {
   const classes = useStyles();
   const history = useHistory();
 
+  const sendOTP = async() => {
+    let token = localStorage.getItem("authToken");
+    let hashOTP = localStorage.getItem("hashOTP");
+    if(hashOTP) {
+      return;
+    }
+
+    let temp = jwt_decode(token).phone;
+    if(temp[0] === '+') {
+      temp = temp.substring(1);
+    }
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
+    };
+
+    try {
+      const res = await axios.post(
+        "http://localhost:9996/sendOTP",
+        { phone: temp },
+        config
+      );
+      localStorage.setItem("hashOTP", res.data.hash);
+      setError('');
+    } catch (error) {
+      if(error.response.status === 401) {
+        alert("Your session has expired. Please login again to continue"); 
+        localStorage.removeItem("authToken");
+        window.location.href = "http://localhost:3000/authLevel1";
+      }
+      else {
+        setError(error.response.data);
+        setLoading(false);
+      }
+    }  
+  }
 
   useEffect(() => {
-    const sendOTP = async() => {
-      let token = localStorage.getItem("authToken");
-      let hashOTP = localStorage.getItem("hashOTP");
-      if(hashOTP) {
-        return;
-      }
-  
-      let temp = jwt_decode(token).phone;
-      if(temp[0] === '+') {
-        temp = temp.substring(1);
-      }
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-      };
-  
-      try {
-        const res = await axios.post(
-          "http://localhost:9996/sendOTP",
-          { phone: temp },
-          config
-        );
-        localStorage.setItem("hashOTP", res.data.hash);
-        setError('');
-      } catch (error) {
-        if(error.response.status === 401) {
-          alert("Your session has expired. Please login again to continue"); 
-          localStorage.removeItem("authToken");
-          window.location.href = "http://localhost:3000/authLevel1";
-        }
-        else {
-          setError(error.response.data);
-          setLoading(false);
-        }
-      }  
-    }
     sendOTP();
   }, [])
+
+  const handleLogout = () => {
+    localStorage.clear();
+    history.push('/authLevel2');
+  }
 
   const INITIAL_FORM_STATE = {
     otp: ''
@@ -220,6 +225,27 @@ const AuthLevel2 = React.memo(() => {
                 </Grid>
               </Form>
             </Formik>
+            <Grid>
+                  <Grid item md={12} xs={12}>
+                    <Link
+                      component="button"
+                      variant="body2"
+                      onClick={handleLogout}
+                    >
+                      Cancel and go back
+                    </Link>
+                  </Grid>
+
+                  {/* <Grid item md={12} xs={12}>
+                    <Link
+                      component="button"
+                      variant="body2"
+                      onClick={sendOTP()}
+                    >
+                      Resend OTP
+                    </Link>
+                  </Grid> */}
+            </Grid>
           </div>
 
       </Grid>

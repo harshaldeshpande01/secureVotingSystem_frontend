@@ -7,7 +7,7 @@ const AuthLevel3 = React.memo(() => {
   const history = useHistory();
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.clear();
     history.push('/authLevel2');
   }
 
