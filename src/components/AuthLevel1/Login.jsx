@@ -116,7 +116,7 @@ const Login = React.memo(() => {
       setLoading(false);
       setTimeout(() => {
         setError("");
-      }, 5000);
+      }, 4000);
     }
   }
 

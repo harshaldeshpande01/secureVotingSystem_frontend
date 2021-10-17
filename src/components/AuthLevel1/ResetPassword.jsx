@@ -107,12 +107,15 @@ const ResetPassword = React.memo(({match}) => {
         );
         setLoading(false);
         setSuccess(data.data);
+        setTimeout(() => {
+          setSuccess("");
+        }, 4000);
       } catch (error) {
         setError(error.response.data);
         setLoading(false);
         setTimeout(() => {
           setError("");
-        }, 5000);
+        }, 4000);
       }
       
       return true;

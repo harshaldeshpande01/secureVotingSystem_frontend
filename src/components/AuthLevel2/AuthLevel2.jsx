@@ -90,7 +90,7 @@ const AuthLevel2 = React.memo(() => {
       setMessage('OTP sent succesfully');
       setTimeout(() => {
         setMessage("");
-      }, 3000);
+      }, 4000);
       setError('');
     } catch (error) {
       if(error.response.status === 401) {
@@ -99,7 +99,7 @@ const AuthLevel2 = React.memo(() => {
         window.location.href = "http://localhost:3000/authLevel1";
       }
       if(error.response.status === 429) {
-        alert("Too many attempts!! Try again later"); 
+        alert("Too many generate attempts!! Try again later"); 
         localStorage.clear();
         window.location.href = "http://localhost:3000/authLevel1";
       }
@@ -107,7 +107,7 @@ const AuthLevel2 = React.memo(() => {
         setError(error.response.data);
         setTimeout(() => {
           setError("");
-        }, 5000);
+        }, 4000);
         setLoading(false);
       }
     }  
@@ -176,14 +176,19 @@ const AuthLevel2 = React.memo(() => {
           setLoading(false);
           setTimeout(() => {
             setError("");
-          }, 5000);
+          }, 4000);
+        }
+        else if(error.response.status === 429) {
+          alert("Too many verify attempts!! Try again later"); 
+          localStorage.clear();
+          window.location.href = "http://localhost:3000/authLevel1";
         }
         else {
           setError(error.response.data);
           setLoading(false);
           setTimeout(() => {
             setError("");
-          }, 5000);
+          }, 4000);
         }
       }    
   }
