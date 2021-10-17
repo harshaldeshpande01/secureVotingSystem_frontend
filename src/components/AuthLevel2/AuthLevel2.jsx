@@ -58,15 +58,16 @@ const useStyles = makeStyles((theme) => ({
 const AuthLevel2 = React.memo(() => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
+  const [message, setMessage] = useState();
   const classes = useStyles();
   const history = useHistory();
 
   const sendOTP = async() => {
     let token = localStorage.getItem("authToken");
-    let hashOTP = localStorage.getItem("hashOTP");
-    if(hashOTP) {
-      return;
-    }
+    // let hashOTP = localStorage.getItem("hashOTP");
+    // if(hashOTP) {
+    //   return;
+    // }
 
     let temp = jwt_decode(token).phone;
     if(temp[0] === '+') {
@@ -86,15 +87,27 @@ const AuthLevel2 = React.memo(() => {
         config
       );
       localStorage.setItem("hashOTP", res.data.hash);
+      setMessage('OTP sent succesfully');
+      setTimeout(() => {
+        setMessage("");
+      }, 3000);
       setError('');
     } catch (error) {
       if(error.response.status === 401) {
         alert("Your session has expired. Please login again to continue"); 
-        localStorage.removeItem("authToken");
+        localStorage.clear();
+        window.location.href = "http://localhost:3000/authLevel1";
+      }
+      if(error.response.status === 429) {
+        alert("Too many attempts!! Try again later"); 
+        localStorage.clear();
         window.location.href = "http://localhost:3000/authLevel1";
       }
       else {
         setError(error.response.data);
+        setTimeout(() => {
+          setError("");
+        }, 5000);
         setLoading(false);
       }
     }  
@@ -159,13 +172,18 @@ const AuthLevel2 = React.memo(() => {
           window.location.href = "http://localhost:3000/authLevel1";
         }
         else if(error.response.status === 504) {
-          alert('OTP Timeout out! Please try again later');
-          localStorage.clear();
-          window.location.href = "http://localhost:3000/authLevel1";
+          setError('OTP timed out! Please resend and try again');
+          setLoading(false);
+          setTimeout(() => {
+            setError("");
+          }, 5000);
         }
         else {
-        setError(error.response.data);
-        setLoading(false);
+          setError(error.response.data);
+          setLoading(false);
+          setTimeout(() => {
+            setError("");
+          }, 5000);
         }
       }    
   }
@@ -178,14 +196,18 @@ const AuthLevel2 = React.memo(() => {
         <Typography component="h1" variant="h5" color='textSecondary' gutterBottom>
           3-Step Verification
         </Typography>
-        <br/>
-        <Typography variant="body2" component='p'>
-          Please enter 6-digit verification code sen't to your registered mobile number to continue
-        </Typography>
         {
           error &&
           <Alert severity="error">{error}</Alert>
         }
+        {
+          message &&
+          <Alert severity="info">{message}</Alert>
+        }
+        <br/>
+        <Typography variant="body2" component='p'>
+          Please enter 6-digit verification code sen't to your registered mobile number to continue
+        </Typography>
           <Grid container>
           <Grid item xs={12}>
             <div className={classes.formWrapper}>
@@ -206,7 +228,7 @@ const AuthLevel2 = React.memo(() => {
                     />
                   </Grid>
 
-                  <Grid item xs={12} align='right'>
+                  <Grid item xs={12}>
                     {
                       loading?
                       <CircularProgress/>
@@ -226,8 +248,9 @@ const AuthLevel2 = React.memo(() => {
               </Form>
             </Formik>
             <Grid>
-                  <Grid item md={12} xs={12}>
+                  <Grid item xs={12}>
                     <Link
+                      style={{marginBottom: '0.5em'}}
                       component="button"
                       variant="body2"
                       onClick={handleLogout}
@@ -236,15 +259,15 @@ const AuthLevel2 = React.memo(() => {
                     </Link>
                   </Grid>
 
-                  {/* <Grid item md={12} xs={12}>
+                  <Grid item xs={12}>
                     <Link
                       component="button"
                       variant="body2"
-                      onClick={sendOTP()}
+                      onClick={sendOTP}
                     >
                       Resend OTP
                     </Link>
-                  </Grid> */}
+                  </Grid>
             </Grid>
           </div>
 
