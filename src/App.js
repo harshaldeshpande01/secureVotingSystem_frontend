@@ -11,6 +11,7 @@ import Auth3Route from "./PrivateRoute2";
 
 const Login = React.lazy(() => import('./components/AuthLevel1/Login'));
 const Register = React.lazy(() => import('./components/AuthLevel1/Register'));
+const Confirm = React.lazy(() => import('./components/AuthLevel1/Confirm'));
 const ForgotPassword = React.lazy(() => import('./components/AuthLevel1/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/AuthLevel1/ResetPassword'));
 const AuthLevel2 = React.lazy(() => import('./components/AuthLevel2/AuthLevel2'));
@@ -26,11 +27,12 @@ export default function App() {
       >
         <Switch>
           <Route exact path="/authLevel1" component={Login} />
-          <Auth2Route exact path="/authLevel2" component={AuthLevel2} />
-          <Auth3Route exact path="/authLevel3" component={AuthLevel3} />
           <Route exact path="/authLevel1/register" component={Register} />
+          <Route exact path="/authLevel1/confirmation/:token" component={Confirm} />
           <Route exact path="/authLevel1/forgotpassword" component={ForgotPassword}/>
           <Route exact path="/authLevel1/passwordreset/:resetToken" component={ResetPassword}/>
+          <Auth2Route exact path="/authLevel2" component={AuthLevel2} />
+          <Auth3Route exact path="/authLevel3" component={AuthLevel3} />
           <Route component={PageNotFound} />
         </Switch>
 
