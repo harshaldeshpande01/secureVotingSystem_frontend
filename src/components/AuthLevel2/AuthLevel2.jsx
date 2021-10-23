@@ -64,10 +64,6 @@ const AuthLevel2 = React.memo(() => {
 
   const sendOTP = async() => {
     let token = localStorage.getItem("authToken");
-    // let hashOTP = localStorage.getItem("hashOTP");
-    // if(hashOTP) {
-    //   return;
-    // }
 
     let temp = jwt_decode(token).phone;
     if(temp[0] === '+') {
@@ -82,7 +78,7 @@ const AuthLevel2 = React.memo(() => {
 
     try {
       const res = await axios.post(
-        "http://localhost:9996/sendOTP",
+        `${process.env.REACT_APP_AUTH_LEVEL2}/sendOTP`,
         { phone: temp },
         config
       );
@@ -99,7 +95,7 @@ const AuthLevel2 = React.memo(() => {
         window.location.href = "http://localhost:3000/authLevel1";
       }
       if(error.response.status === 429) {
-        alert("Too many generate attempts!! Try again later"); 
+        alert("Too many attempts!! Try again later"); 
         localStorage.clear();
         window.location.href = "http://localhost:3000/authLevel1";
       }
@@ -108,7 +104,6 @@ const AuthLevel2 = React.memo(() => {
         setTimeout(() => {
           setError("");
         }, 4000);
-        setLoading(false);
       }
     }  
   }
@@ -152,7 +147,7 @@ const AuthLevel2 = React.memo(() => {
 
       try {
         const res  = await axios.post(
-          "http://localhost:9996/verifyOTP",
+          `${process.env.REACT_APP_AUTH_LEVEL2}/verifyOTP`,
           { 
             phone: temp, 
             hash, 

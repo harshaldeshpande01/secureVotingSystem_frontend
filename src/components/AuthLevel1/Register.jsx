@@ -112,7 +112,7 @@ const Register = React.memo(() => {
   
     try {
       const res = await axios.post(
-        "http://localhost:9997/api/auth/register",
+        `${process.env.REACT_APP_AUTH_LEVEL1}/register`,
         { 
           email, 
           password, 

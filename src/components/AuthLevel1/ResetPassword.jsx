@@ -98,7 +98,7 @@ const ResetPassword = React.memo(({match}) => {
   
       try {
         const { data } = await axios.put(
-          `http://localhost:9997/api/auth/passwordreset/${match.params.resetToken}`,
+          `${process.env.REACT_APP_AUTH_LEVEL1}/passwordreset/${match.params.resetToken}`,
           {
             password,
             captchaToken

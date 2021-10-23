@@ -57,7 +57,7 @@ const Confirm = React.memo(({match}) => {
     };
     try {
         const { data } = await axios.put(
-          `http://localhost:9997/api/auth/confirmation/${match.params.token}`,
+          `${process.env.REACT_APP_AUTH_LEVEL1}/confirmation/${match.params.token}`,
           {},
           config
         );
