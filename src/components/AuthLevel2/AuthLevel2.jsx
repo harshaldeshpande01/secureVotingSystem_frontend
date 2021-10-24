@@ -7,7 +7,6 @@ import {
   CssBaseline,
   Link,
   Grid,
-  Box,
   Container,
   Typography,
   CircularProgress
@@ -19,21 +18,9 @@ import Alert from '@material-ui/lab/Alert';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Textfield from '../FormsUI/Textfield';
-
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import jwt_decode from 'jwt-decode';
 
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Secure Voting System
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -58,9 +45,27 @@ const useStyles = makeStyles((theme) => ({
 const AuthLevel2 = React.memo(() => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
-  const [message, setMessage] = useState();
+  // const [message, setMessage] = useState();
+  const [play, setPlay] = useState(false);
+  const [visible, setVisible] = useState(false);
   const classes = useStyles();
   const history = useHistory();
+  const at = localStorage.getItem("authToken");
+
+    const renderTime = ({ remainingTime }) => {
+      if (remainingTime === 0) {
+        setVisible(false);
+        setPlay(false);
+        return <div className="timer">Timed out</div>;
+      }
+    
+      return (
+        <div className="timer">
+          <div className="value">{remainingTime}</div>
+          <div className="text">seconds</div>
+        </div>
+      );
+    };
 
   const sendOTP = async() => {
     let token = localStorage.getItem("authToken");
@@ -83,10 +88,12 @@ const AuthLevel2 = React.memo(() => {
         config
       );
       localStorage.setItem("hashOTP", res.data.hash);
-      setMessage('OTP sent succesfully');
-      setTimeout(() => {
-        setMessage("");
-      }, 4000);
+      // setMessage('OTP sent succesfully');
+      // setTimeout(() => {
+      //   setMessage("");
+      // }, 4000);
+      setVisible(true);
+      setPlay(true);
       setError('');
     } catch (error) {
       if(error.response.status === 401) {
@@ -157,7 +164,6 @@ const AuthLevel2 = React.memo(() => {
         );
         localStorage.removeItem("authToken");
         localStorage.setItem("authToken", res.data.accessToken);
-        setLoading(false);
         localStorage.removeItem("hashOTP");
         history.push("/authLevel3");
       } catch (error) {
@@ -194,20 +200,21 @@ const AuthLevel2 = React.memo(() => {
       <CssBaseline />
       <div className={classes.paper}>
         <Typography component="h1" variant="h5" color='textSecondary' gutterBottom>
-          3-Step Verification
+          2-Step Verification
         </Typography>
         {
           error &&
           <Alert severity="error">{error}</Alert>
         }
-        {
+        {/* {
           message &&
           <Alert severity="info">{message}</Alert>
-        }
+        } */}
         <br/>
-        <Typography variant="body2" component='p'>
-          Please enter 6-digit verification code sen't to your registered mobile number to continue
-        </Typography>
+        <Typography variant="body2" component="p" align="center" gutterBottom>
+          Enter OTP Sent to your mobile number XXXXXXXX{jwt_decode(at).phone.substr(8)}
+        </Typography> 
+
           <Grid container>
           <Grid item xs={12}>
             <div className={classes.formWrapper}>
@@ -247,37 +254,50 @@ const AuthLevel2 = React.memo(() => {
                 </Grid>
               </Form>
             </Formik>
-            <Grid>
-                  <Grid item xs={12}>
-                    <Link
-                      style={{marginBottom: '0.5em'}}
-                      component="button"
-                      variant="body2"
-                      onClick={handleLogout}
-                    >
-                      Cancel and go back
-                    </Link>
-                  </Grid>
+            </div>
+            <Grid item xs={12}>
+              <Link
+                style={{marginBottom: '0.5em'}}
+                component="button"
+                variant="body2"
+                onClick={handleLogout}
+              >
+                Cancel and go back
+              </Link>
+            </Grid>
+            {
+              !visible &&
+                <Grid item xs={12}>
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={sendOTP}
+                  >
+                    Resend OTP
+                  </Link>
+                </Grid>
+            }
 
-                  <Grid item xs={12}>
-                    <Link
-                      component="button"
-                      variant="body2"
-                      onClick={sendOTP}
-                    >
-                      Resend OTP
-                    </Link>
-                  </Grid>
+          <div style={{marginTop: '2em'}}>
+            <Grid align='center'>
+            {
+              visible &&
+              <CountdownCircleTimer
+                isPlaying={play}
+                duration={60}
+                colors={[["#004777", 0.33], ["#F7B801", 0.33], ["#A30000"]]}
+                onComplete={() => [true, 1000]}
+                size={130}
+              >
+                {renderTime}
+              </CountdownCircleTimer>
+            } 
             </Grid>
           </div>
 
       </Grid>
-      </Grid>  
-       
+      </Grid> 
       </div>
-      <Box mt={8}>
-        <Copyright />
-      </Box>
     </Container>
     </div>
   );
