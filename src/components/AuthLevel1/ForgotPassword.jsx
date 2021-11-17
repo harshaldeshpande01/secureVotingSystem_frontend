@@ -11,15 +11,13 @@ import {
   Box,
   Container,
   Typography
-} from '@material-ui/core';
-
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
 
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Textfield from '../FormsUI/Textfield';
 
-import Alert from '@material-ui/lab/Alert';
+import Alert from '@mui/material/Alert';
 
 function Copyright() {
   return (
@@ -34,20 +32,7 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(10),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  formWrapper: {
-    marginTop: theme.spacing(4),
-  },
-}));
-
 const ForgotPassword = React.memo(() => {
-  const classes = useStyles();
   const history = useHistory();
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
@@ -110,7 +95,7 @@ const ForgotPassword = React.memo(() => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div style={{marginTop: '6em', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
         <Typography component="h1" variant="h5" gutterBottom>
           Forgot Password
         </Typography>
@@ -127,7 +112,7 @@ const ForgotPassword = React.memo(() => {
         }
         <Grid container>
           <Grid item xs={12}>
-            <div className={classes.formWrapper}>
+            <div style={{ marginTop: '2em'}}>
               <Formik
                 initialValues={{
                   ...INITIAL_FORM_STATE

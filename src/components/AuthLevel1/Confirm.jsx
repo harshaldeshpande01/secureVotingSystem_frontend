@@ -9,9 +9,7 @@ import {
   Container,
   Typography,
   CircularProgress
-} from '@material-ui/core';
-
-import { makeStyles } from '@material-ui/core/styles';
+} from '@mui/material';
 
 function Copyright() {
   return (
@@ -26,23 +24,7 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(10),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  formWrapper: {
-    marginTop: theme.spacing(4),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
-
 const Confirm = React.memo(({match}) => {
-  const classes = useStyles();
   const history = useHistory();
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -90,7 +72,7 @@ const Confirm = React.memo(({match}) => {
         :
             <Container component="main" maxWidth="xs">
             <CssBaseline />
-            <div className={classes.paper}>
+            <div style={{marginTop: '6em', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                 {
                     error &&
                     <Typography component="h1" variant="h5" gutterBottom>

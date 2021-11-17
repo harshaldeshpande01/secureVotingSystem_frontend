@@ -3,7 +3,7 @@ import {
     Link,
     Typography,
     Box
-  } from '@material-ui/core';
+  } from '@mui/material';
 
 const PageNotFound = () => {
     return (

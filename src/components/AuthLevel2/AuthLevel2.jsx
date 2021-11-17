@@ -10,10 +10,9 @@ import {
   Container,
   Typography,
   CircularProgress
-} from '@material-ui/core';
+} from '@mui/material';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Alert from '@material-ui/lab/Alert';
+import Alert from '@mui/material/Alert';
 
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
@@ -22,33 +21,11 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 import jwt_decode from 'jwt-decode';
 
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(10),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-}));
-
 const AuthLevel2 = React.memo(() => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState();
-  // const [message, setMessage] = useState();
   const [play, setPlay] = useState(false);
   const [visible, setVisible] = useState(false);
-  const classes = useStyles();
   const history = useHistory();
   const at = localStorage.getItem("authToken");
 
@@ -68,6 +45,7 @@ const AuthLevel2 = React.memo(() => {
     };
 
   const sendOTP = async() => {
+    console.log(2);
     let token = localStorage.getItem("authToken");
 
     let temp = jwt_decode(token).phone;
@@ -82,20 +60,18 @@ const AuthLevel2 = React.memo(() => {
     };
 
     try {
+      console.log(3);
       const res = await axios.post(
         `${process.env.REACT_APP_AUTH_LEVEL2}/sendOTP`,
         { phone: temp },
         config
       );
       localStorage.setItem("hashOTP", res.data.hash);
-      // setMessage('OTP sent succesfully');
-      // setTimeout(() => {
-      //   setMessage("");
-      // }, 4000);
       setVisible(true);
       setPlay(true);
       setError('');
     } catch (error) {
+      console.log(4);
       if(error.response.status === 401) {
         alert("Your session has expired. Please login again to continue"); 
         localStorage.clear();
@@ -116,6 +92,7 @@ const AuthLevel2 = React.memo(() => {
   }
 
   useEffect(() => {
+    console.log(1);
     sendOTP();
   }, [])
 
@@ -165,7 +142,7 @@ const AuthLevel2 = React.memo(() => {
         localStorage.removeItem("authToken");
         localStorage.setItem("authToken", res.data.accessToken);
         localStorage.removeItem("hashOTP");
-        history.push("/authLevel3");
+        history.push("/");
       } catch (error) {
         if(error.response.status === 401) {
           alert("Your session has expired. Please login again to continue"); 
@@ -198,7 +175,7 @@ const AuthLevel2 = React.memo(() => {
       <div>
       <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div style={{ marginTop: '6em', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
         <Typography component="h1" variant="h5" color='textSecondary' gutterBottom>
           2-Step Verification
         </Typography>
@@ -206,10 +183,6 @@ const AuthLevel2 = React.memo(() => {
           error &&
           <Alert severity="error">{error}</Alert>
         }
-        {/* {
-          message &&
-          <Alert severity="info">{message}</Alert>
-        } */}
         <br/>
         <Typography variant="body2" component="p" align="center" gutterBottom>
           Enter OTP Sent to your mobile number XXXXXXXX{jwt_decode(at).phone.substr(8)}
@@ -217,7 +190,7 @@ const AuthLevel2 = React.memo(() => {
 
           <Grid container>
           <Grid item xs={12}>
-            <div className={classes.formWrapper}>
+            <div style={{marginTop: '2em'}}>
               <Formik
                 initialValues={{
                   ...INITIAL_FORM_STATE
@@ -225,7 +198,7 @@ const AuthLevel2 = React.memo(() => {
                 validationSchema={FORM_VALIDATION}
                 onSubmit={values => verifyOTP(values)}
               >
-                <Form className={classes.form}>
+                <Form style={{marginTop: '2em'}}>
                 <Grid container spacing={2}>
 
                   <Grid item xs={12}>

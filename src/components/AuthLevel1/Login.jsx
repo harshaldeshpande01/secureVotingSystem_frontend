@@ -14,17 +14,16 @@ import {
   CircularProgress,
   InputAdornment,
   IconButton
-} from '@material-ui/core';
+} from '@mui/material';
 
-import { makeStyles } from '@material-ui/core/styles';
-import Visibility from "@material-ui/icons/Visibility";
-import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Textfield from '../FormsUI/Textfield';
 
-import Alert from '@material-ui/lab/Alert';
+import Alert from '@mui/material/Alert';
 
 function Copyright() {
   return (
@@ -39,20 +38,20 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(10),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-  },
-  formWrapper: {
-    marginTop: theme.spacing(4),
-  },
-}));
+// const useStyles = makeStyles((theme) => ({
+//   paper: {
+//     marginTop: theme.spacing(10),
+//     display: 'flex',
+//     flexDirection: 'column',
+//     alignItems: 'center'
+//   },
+//   formWrapper: {
+//     marginTop: theme.spacing(4),
+//   },
+// }));
+
 
 const Login = React.memo(() => {
-  const classes = useStyles();
   const history = useHistory();
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
@@ -123,7 +122,7 @@ const Login = React.memo(() => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
+      <div style={{ marginTop: '6em', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
         <Typography component="h1" variant="h5" gutterBottom>
           Sign In
         </Typography>
@@ -140,7 +139,7 @@ const Login = React.memo(() => {
         }
         <Grid container>
           <Grid item xs={12}>
-            <div className={classes.formWrapper}>
+            <div style={{marginTop: '2em'}}>
               <Formik
                 initialValues={{
                   ...INITIAL_FORM_STATE
@@ -169,7 +168,7 @@ const Login = React.memo(() => {
                               aria-label="toggle password visibility"
                               onClick={handleClickShowPassword}
                               onMouseDown={handleMouseDownPassword}
-                            >
+                              size="large">
                               {showPassword ? <Visibility color='primary'/> : <VisibilityOff color='primary'/>}
                             </IconButton>
                           </InputAdornment>

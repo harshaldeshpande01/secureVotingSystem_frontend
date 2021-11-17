@@ -4,10 +4,10 @@ import {
   Switch,
   Route
 } from "react-router-dom";
-import { CircularProgress } from "@material-ui/core";
+import { CircularProgress } from "@mui/material";
 
-import Auth2Route from "./PrivateRoutes";
-import Auth3Route from "./PrivateRoute2";
+import OTPRoute from "./routes/OTPRoute";
+import HomeRoute from "./routes/HomeRoute";
 
 const Login = React.lazy(() => import('./components/AuthLevel1/Login'));
 const Register = React.lazy(() => import('./components/AuthLevel1/Register'));
@@ -15,7 +15,7 @@ const Confirm = React.lazy(() => import('./components/AuthLevel1/Confirm'));
 const ForgotPassword = React.lazy(() => import('./components/AuthLevel1/ForgotPassword'));
 const ResetPassword = React.lazy(() => import('./components/AuthLevel1/ResetPassword'));
 const AuthLevel2 = React.lazy(() => import('./components/AuthLevel2/AuthLevel2'));
-const AuthLevel3 = React.lazy(() => import('./components/AuthLevel3/AuthLevel3'));
+const Dashboard = React.lazy(() => import('./components/Voting/Dashboard'));
 const PageNotFound = React.lazy(() => import('./components/404/404'));
 
 export default function App() {
@@ -31,8 +31,8 @@ export default function App() {
           <Route exact path="/authLevel1/confirmation/:token" component={Confirm} />
           <Route exact path="/authLevel1/forgotpassword" component={ForgotPassword}/>
           <Route exact path="/authLevel1/passwordreset/:resetToken" component={ResetPassword}/>
-          <Auth2Route exact path="/authLevel2" component={AuthLevel2} />
-          <Auth3Route exact path="/authLevel3" component={AuthLevel3} />
+          <OTPRoute exact path="/authLevel2" component={AuthLevel2} />
+          <HomeRoute exact path="/" component={Dashboard} />
           <Route component={PageNotFound} />
         </Switch>
 
