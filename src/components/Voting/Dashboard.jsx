@@ -1,12 +1,14 @@
-import * as React from 'react';
+import React, {useState, useEffect} from 'react';
+import { CONTRACT_ADDRESS, CONTRACT_ABI } from '../../config';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+// import useMediaQuery from '@mui/material/useMediaQuery';
 import CssBaseline from '@mui/material/CssBaseline';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
-import Navigator from './Navigator';
-import Content from './Content';
+// import Navigator from './Navigator';
+import Web3 from 'web3'
+// import Content from './Content';
 import Header from './Header';
 
 
@@ -166,21 +168,53 @@ theme = {
   },
 };
 
-const drawerWidth = 256;
+// const drawerWidth = 256;
 
 export default function Paperbase() {
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
+  // const isSmUp = useMediaQuery(theme.breakpoints.up('sm'));
+
+  const [loading, setLoading] = useState();
+  const [account, setAccount] = useState();
+  const [contract, setContract] = useState();
+  const [candidateCount, setCandidateCount] = useState();
+  const [candidates, setCandidates] = useState();
+
+  useEffect(() => {
+    loadBlockchainData();
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const loadBlockchainData = async() => {
+    setLoading(true)
+    const web3 = new Web3(Web3.givenProvider || "http://localhost:8545")
+
+    const accounts = await web3.eth.getAccounts()
+    setAccount(accounts[0])
+    
+    const contract = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS)
+    setContract(contract);
+
+    const count = await contract.methods.candidatesCount().call()
+    setCandidateCount(count);
+
+    let getCandidates = []
+    for (let i = 1; i <= count; i++) {
+      const candidate = await contract.methods.candidates(i).call()
+      getCandidates.push(candidate)
+    }
+    setCandidates(getCandidates)
+    setLoading(false)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex', minHeight: '100vh' }}>
         <CssBaseline />
-        <Box
+        {/* <Box
           component="nav"
           sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         >
@@ -197,16 +231,40 @@ export default function Paperbase() {
             PaperProps={{ style: { width: drawerWidth } }}
             sx={{ display: { sm: 'block', xs: 'none' } }}
           />
-        </Box>
-        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Header onDrawerToggle={handleDrawerToggle} />
-          <Box component="main" sx={{ flex: 1, py: 6, px: 4, bgcolor: '#eaeff1' }}>
-            <Content />
+        </Box> */}
+
+        {/* {
+          loading?
+          <Typography>
+            Loading...
+          </Typography>
+          : */}
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Header onDrawerToggle={handleDrawerToggle} />
+
+            <Typography component='h1' variant="h5" align='center' style={{margin: '4em'}}>
+              Hello {account}
+            </Typography>
+
+            {candidates &&
+              candidates.map((c, key) => {
+                return(
+                  <div key={key}>
+                    <Typography align='çenter'>
+                      {c.name}
+                    </Typography>
+                  </div>
+                )
+            })}
+
+            {/* <Box component="main" sx={{ flex: 1, py: 6, px: 4, bgcolor: '#eaeff1' }}>
+              <Content />
+            </Box> */}
+            {/* <Box component="footer" sx={{ p: 2, bgcolor: '#eaeff1' }}> */}
+              <Copyright />
+            {/* </Box> */}
           </Box>
-          <Box component="footer" sx={{ p: 2, bgcolor: '#eaeff1' }}>
-            <Copyright />
-          </Box>
-        </Box>
+        {/* } */}
       </Box>
     </ThemeProvider>
   );

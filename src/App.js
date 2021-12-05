@@ -31,11 +31,12 @@ export default function App() {
           <Route exact path="/authLevel1/confirmation/:token" component={Confirm} />
           <Route exact path="/authLevel1/forgotpassword" component={ForgotPassword}/>
           <Route exact path="/authLevel1/passwordreset/:resetToken" component={ResetPassword}/>
-          <OTPRoute exact path="/authLevel2" component={AuthLevel2} />
-          <HomeRoute exact path="/" component={Dashboard} />
+          {/* <OTPRoute exact path="/authLevel2" component={AuthLevel2} /> */}
+          <Route exact path="/authLevel2" component={AuthLevel2} />
+          <Route exact path="/" component={Dashboard} />
+          {/* <HomeRoute exact path="/" component={Dashboard} /> */}
           <Route component={PageNotFound} />
         </Switch>
-
       </Suspense>
     </div>
   </Router>

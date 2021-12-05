@@ -4,17 +4,18 @@ import axios from "axios";
 import ReCAPTCHA from "react-google-recaptcha";
 
 import {
-  Button,
   CssBaseline,
   Link,
   Grid,
   Box,
   Container,
   Typography,
-  CircularProgress,
   InputAdornment,
-  IconButton
+  IconButton,
+  Snackbar,
+  Alert
 } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -23,7 +24,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import Textfield from '../FormsUI/Textfield';
 
-import Alert from '@mui/material/Alert';
+// import Alert from '@mui/material/Alert';
 
 function Copyright() {
   return (
@@ -38,25 +39,13 @@ function Copyright() {
   );
 }
 
-// const useStyles = makeStyles((theme) => ({
-//   paper: {
-//     marginTop: theme.spacing(10),
-//     display: 'flex',
-//     flexDirection: 'column',
-//     alignItems: 'center'
-//   },
-//   formWrapper: {
-//     marginTop: theme.spacing(4),
-//   },
-// }));
-
 
 const Login = React.memo(() => {
   const history = useHistory();
   const [error, setError] = useState();
   const [loading, setLoading] = useState();
-  const [message, setMessage] = useState();
   const [showPassword, setShowPassword] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
   const recaptchaRef = useRef();
@@ -66,6 +55,13 @@ const Login = React.memo(() => {
       history.push("/authLevel2");
     }
   }, [history]);
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
 
   const INITIAL_FORM_STATE = {
     email: '',
@@ -107,15 +103,12 @@ const Login = React.memo(() => {
         config
       );
       setLoading(false);
-      setMessage(res.data.data)
       localStorage.setItem("authToken", res.data.token);
       history.push('/authLevel2');
     } catch (error) {
       setError(error.response.data);
       setLoading(false);
-      setTimeout(() => {
-        setError("");
-      }, 4000);
+      setOpen(true);
     }
   }
 
@@ -126,20 +119,13 @@ const Login = React.memo(() => {
         <Typography component="h1" variant="h5" gutterBottom>
           Sign In
         </Typography>
-        <Typography variant="body2" color='textSecondary' gutterBottom>
+        <Typography variant="body2" color='textSecondary' style={{marginBottom: '2em'}}>
           secure e-voting platform
         </Typography>
-        {
-          error &&
-          <Alert severity="error">{error}</Alert>
-        }
-        {
-          message &&
-          <Alert varinat='outlined' severity="info">{message}</Alert>
-        }
+
         <Grid container>
           <Grid item xs={12}>
-            <div style={{marginTop: '2em'}}>
+            <div>
               <Formik
                 initialValues={{
                   ...INITIAL_FORM_STATE
@@ -192,20 +178,15 @@ const Login = React.memo(() => {
                 </Grid>
 
                   <Grid item xs={12} align='right'>
-                    {
-                      loading?
-                      <CircularProgress/>
-                      :
-                      <Button 
-                        type='submit'
-                        disabled={loading}
-                        color='primary'
-                        variant='contained'
-                        style={{marginBottom: '1em'}}
-                      >
-                        Login
-                      </Button>
-                    }
+                  <LoadingButton
+                    type='submit'
+                    loading={loading}
+                    color='primary'
+                    variant='contained'
+                    style={{marginBottom: '1em'}}
+                  >
+                    Login
+                  </LoadingButton>
                   </Grid>
                 </Grid>
               </Form>
@@ -214,6 +195,7 @@ const Login = React.memo(() => {
               ref={recaptchaRef}
               sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
               size="invisible"
+              badge='bottomleft'
             />
           </div>
 
@@ -223,6 +205,21 @@ const Login = React.memo(() => {
       <Box mt={5}>
         <Copyright />
       </Box>
+
+      <Snackbar 
+        open={open} 
+        autoHideDuration={6000} 
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+      >
+        <Alert onClose={handleClose} severity="error" sx={{ width: '100%', height: '100%' }}>
+          Invalid username or password!
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 })
