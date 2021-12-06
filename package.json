@@ -32,7 +32,7 @@
     "@mui/icons-material": "^5.0.5",
     "@mui/lab": "*",
     "@mui/material": "^5.0.6",
-    "@mui/styles": "^5.0.2",
+    "@mui/styles": "^5.1.0",
     "axios": "^0.22.0",
     "formik": "^2.2.9",
     "jwt-decode": "^3.1.2",
